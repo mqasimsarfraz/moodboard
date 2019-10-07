@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/MQasimSarfraz/moodboard/pkg/service"
+	"github.com/MQasimSarfraz/moodboard/pkg/api"
+	"github.com/MQasimSarfraz/moodboard/pkg/board"
 	"github.com/jessevdk/go-flags"
 	"os"
 )
@@ -16,6 +17,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	service.Run()
+	// start the server
+	api.Serve(api.NewApi(board.NewBoard()), opts.Address)
 
 }
