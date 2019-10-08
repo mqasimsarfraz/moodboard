@@ -38,4 +38,5 @@ func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, param
 
 func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	mood = params.ByName("mood")
+	fmt.Fprintf(writer, "mood updated :+!\n")
 }
