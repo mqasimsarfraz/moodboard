@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+var mood = "hello"
+
 type Api struct {
 	Board *board.Board
 }
@@ -21,6 +23,8 @@ func register(api *Api) http.Handler {
 	// register router handlers here
 	router.GET("/ping", api.ping)
 	router.GET("/", api.handleIndex)
+	router.PUT("/mood/:mood", api.handleMoodUpdate)
+
 	return router
 }
 
@@ -29,5 +33,9 @@ func (api *Api) ping(writer http.ResponseWriter, req *http.Request, params httpr
 }
 
 func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	api.Board.Render(writer, "https://media.giphy.com/media/7NSaeMtpw4nSlqGUaT/giphy.gif")
+	api.Board.Render(writer, mood)
+}
+
+func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	mood = params.ByName("mood")
 }
