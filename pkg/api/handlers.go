@@ -29,5 +29,5 @@ func (api *Api) ping(writer http.ResponseWriter, req *http.Request, params httpr
 }
 
 func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	api.Board.Render(writer, "world")
+	api.Board.Render(writer, "https://media.giphy.com/media/7NSaeMtpw4nSlqGUaT/giphy.gif")
 }
