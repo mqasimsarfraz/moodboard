@@ -19,12 +19,12 @@ func NewBoard() *Board {
 
 var renderTemplate = render.New().HTML
 
-func (b *Board) Render(writer io.Writer, mood string) error {
+func (b *Board) Render(writer io.Writer, mood []string) error {
 
 	g := giphy.DefaultClient
 	g.Limit = 1
 
-	gif, err := g.Search([]string{mood})
+	gif, err := g.Search(mood)
 	if err != nil {
 		return errors.WithMessage(err, "getting gif")
 	}

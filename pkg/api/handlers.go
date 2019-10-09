@@ -1,13 +1,16 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/MQasimSarfraz/moodboard/pkg/board"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"strings"
 )
 
-var mood = "hello"
+var mood = []string{"hello", "world"}
+var moodChanged = false
 
 type Api struct {
 	Board *board.Board
@@ -24,6 +27,7 @@ func register(api *Api) http.Handler {
 	router.GET("/ping", api.ping)
 	router.GET("/", api.handleIndex)
 	router.PUT("/mood/:mood", api.handleMoodUpdate)
+	router.GET("/mood/changed", api.handleMoodChanged)
 
 	return router
 }
@@ -33,10 +37,37 @@ func (api *Api) ping(writer http.ResponseWriter, req *http.Request, params httpr
 }
 
 func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	api.Board.Render(writer, mood)
+	err := api.Board.Render(writer, mood)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	}
+	moodChanged = false
 }
 
 func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	mood = params.ByName("mood")
-	fmt.Fprintf(writer, "mood updated :+!\n")
+	mood = strings.Split(params.ByName("mood"), " ")
+	moodChanged = true
+
+	resp, err := json.Marshal(&Response{Mood: mood, Changed: moodChanged})
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Write(resp)
+}
+
+func (api *Api) handleMoodChanged(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	resp, err := json.Marshal(&Response{Mood: mood, Changed: moodChanged})
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Write(resp)
+}
+
+type Response struct {
+	Changed bool     `json:"changed"`
+	Mood    []string `json:"currentMood"`
 }
