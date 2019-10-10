@@ -30,5 +30,13 @@ body, html {
 
 <div class="bg"></div>
 
+<script type="text/javascript">
+setInterval(async () => {
+    const response = await fetch('http://localhost/mood/changed');
+    const { changed } = await response.json();
+    if (changed) location.reload(1);
+}, 2000);
+</script>
+
 </body>
 </html>
