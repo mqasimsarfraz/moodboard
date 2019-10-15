@@ -1,5 +1,5 @@
 # Moodboard
-This tool will help show your team mood using a giphy GF.
+This tool will help show your team mood using a giphy GIFs.
 ## Installation
 ```
 docker run --rm -d -e GIPHY_API_KEY=${API_KEY} -p 80:3080 --name moodboard smqasims/moodboard

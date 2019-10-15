@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/unrolled/render"
 	"io"
+	"math/rand"
 	"net/http"
 )
 
@@ -20,10 +21,7 @@ func NewBoard() *Board {
 var renderTemplate = render.New().HTML
 
 func (b *Board) Render(writer io.Writer, mood []string) error {
-
 	g := giphy.DefaultClient
-	g.Limit = 1
-
 	gif, err := g.Search(mood)
 	if err != nil {
 		return errors.WithMessage(err, "getting gif")
@@ -33,7 +31,7 @@ func (b *Board) Render(writer io.Writer, mood []string) error {
 		return ErrGifNotFound
 	}
 
-	err = renderTemplate(writer, http.StatusOK, "board.html", gif.Data[0].MediaURL())
+	err = renderTemplate(writer, http.StatusOK, "board.html", gif.Data[rand.Intn(g.Limit)].MediaURL())
 	if err != nil {
 		return errors.WithMessage(err, "rendering template")
 	}
