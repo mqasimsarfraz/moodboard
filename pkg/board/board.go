@@ -9,9 +9,14 @@ import (
 	"net/http"
 )
 
-var ErrGifNotFound = errors.New("No gif found")
+var NoGifFoundURL = "https://media.giphy.com/media/9J7tdYltWyXIY/giphy.gif"
 
 type Board struct {
+}
+
+type Gif struct {
+	URL  string
+	Mood []string
 }
 
 func NewBoard() *Board {
@@ -27,11 +32,14 @@ func (b *Board) Render(writer io.Writer, mood []string) error {
 		return errors.WithMessage(err, "getting gif")
 	}
 
+	var gifURL string
 	if (len(gif.Data)) < 1 {
-		return ErrGifNotFound
+		gifURL = NoGifFoundURL
+	} else {
+		gifURL = gif.Data[rand.Intn(g.Limit)].MediaURL()
 	}
 
-	err = renderTemplate(writer, http.StatusOK, "board.html", gif.Data[rand.Intn(g.Limit)].MediaURL())
+	err = renderTemplate(writer, http.StatusOK, "board.html", Gif{URL: gifURL, Mood: mood})
 	if err != nil {
 		return errors.WithMessage(err, "rendering template")
 	}

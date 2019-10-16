@@ -10,7 +10,6 @@ import (
 )
 
 var mood = []string{"hello", "world"}
-var moodChanged = false
 
 type Api struct {
 	Board *board.Board
@@ -27,7 +26,7 @@ func register(api *Api) http.Handler {
 	router.GET("/ping", api.ping)
 	router.GET("/", api.handleIndex)
 	router.PUT("/mood/:mood", api.handleMoodUpdate)
-	router.GET("/mood/changed", api.handleMoodChanged)
+	router.GET("/mood", api.handleMoodGet)
 
 	return router
 }
@@ -41,14 +40,11 @@ func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, param
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
-	moodChanged = false
 }
 
 func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	mood = strings.Split(params.ByName("mood"), " ")
-	moodChanged = true
-
-	resp, err := json.Marshal(&Response{Mood: mood, Changed: moodChanged})
+	resp, err := json.Marshal(&Response{Mood: mood})
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
@@ -57,8 +53,8 @@ func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, 
 	writer.Write(resp)
 }
 
-func (api *Api) handleMoodChanged(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	resp, err := json.Marshal(&Response{Mood: mood, Changed: moodChanged})
+func (api *Api) handleMoodGet(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	resp, err := json.Marshal(&Response{Mood: mood})
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
@@ -68,6 +64,5 @@ func (api *Api) handleMoodChanged(writer http.ResponseWriter, req *http.Request,
 }
 
 type Response struct {
-	Changed bool     `json:"changed"`
-	Mood    []string `json:"currentMood"`
+	Mood []string `json:"mood"`
 }

@@ -1,40 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Moodboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body, html {
-  height: 100%;
-  margin: 0;
-}
+    <title>Moodboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
 
-.bg {
-  /* The image used */
-  background-image: url("{{.}}");
+        .bg {
+            /* The image used */
+            background-image: url("{{.URL}}");
 
-  /* Full height */
-  height: 100vh;
-  width: 100vw;
+            /* Full height */
+            height: 100vh;
+            width: 100vw;
 
-  /* Center and scale the image nicely */
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-color: black;
-}
-</style>
+            /* Center and scale the image nicely */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-color: black;
+        }
+    </style>
 </head>
 <body>
 
 <div class="bg"></div>
 
 <script type="text/javascript">
-setInterval(async () => {
-    const response = await fetch('http://' + location.host + '/mood/changed');
-    const { changed } = await response.json();
-    if (changed) location.reload(1);
-}, 2000);
+    let initial = null;
+
+    setInterval(async () => {
+        const response = await fetch('//' + location.host + '/mood');
+        const {mood} = await response.json();
+        if (initial != null && JSON.stringify(mood) !== JSON.stringify(initial)) {
+            location.reload();
+        } else {
+            initial = mood;
+        }
+    }, 1000);
 </script>
 
 </body>
