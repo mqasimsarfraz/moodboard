@@ -36,7 +36,7 @@ func (b *Board) Render(writer io.Writer, mood []string) error {
 	if (len(gif.Data)) < 1 {
 		gifURL = NoGifFoundURL
 	} else {
-		gifURL = gif.Data[rand.Intn(g.Limit)].MediaURL()
+		gifURL = gif.Data[rand.Intn(len(gif.Data))].MediaURL()
 	}
 
 	err = renderTemplate(writer, http.StatusOK, "board.html", Gif{URL: gifURL, Mood: mood})
