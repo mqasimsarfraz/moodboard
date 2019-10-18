@@ -26,6 +26,7 @@ func register(api *Api) http.Handler {
 	router.GET("/ping", api.ping)
 	router.GET("/", api.handleIndex)
 	router.PUT("/mood/:mood", api.handleMoodUpdate)
+	router.OPTIONS("/mood/:mood", api.handleCorsPreflight)
 	router.GET("/mood", api.handleMoodGet)
 
 	return router
@@ -43,6 +44,7 @@ func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, param
 }
 
 func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	api.setCorsHeaders(writer)
 	mood = strings.Split(params.ByName("mood"), " ")
 	resp, err := json.Marshal(&Response{Mood: mood})
 	if err != nil {
@@ -61,6 +63,15 @@ func (api *Api) handleMoodGet(writer http.ResponseWriter, req *http.Request, par
 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Write(resp)
+}
+
+func (api *Api) handleCorsPreflight(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	api.setCorsHeaders(writer)
+}
+
+func (api *Api) setCorsHeaders(writer http.ResponseWriter) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT")
 }
 
 type Response struct {
