@@ -23,11 +23,30 @@
             background-size: contain;
             background-color: black;
         }
+
+        .content {
+            color: lightgray;
+            background-color: black;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+
+            margin-bottom: 3vh;
+            margin-left: 3vw;
+
+            padding: 10px;
+            border: ridge lightgray;
+
+            font-size: medium;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-<div class="bg"></div>
+<div class="bg">
+    <p class="content">MOOD: {{ StringJoin .Mood " " | ToUpper }}</p>
+</div>
 
 <script type="text/javascript">
     let initial = null;

@@ -37,10 +37,8 @@ func (api *Api) ping(writer http.ResponseWriter, req *http.Request, params httpr
 }
 
 func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	err := api.Board.Render(writer, mood)
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-	}
+	writer.Header().Set("Content-Type", "application/html")
+	api.Board.Render(writer, mood)
 }
 
 func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
