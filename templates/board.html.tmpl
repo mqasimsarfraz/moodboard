@@ -9,10 +9,7 @@
             margin: 0;
         }
 
-        .bg {
-            /* The image used */
-            background-image: url("{{.URL}}");
-
+        .video {
             /* Full height */
             height: 100vh;
             width: 100vw;
@@ -27,22 +24,32 @@
         .content {
             color: lightgray;
             background-color: black;
+
             position: absolute;
             bottom: 0;
             left: 0;
-
-            margin-bottom: 3vh;
             margin-left: 3vw;
-
+            margin-bottom: 3vh;
             padding: 10px;
+
             border: ridge lightgray;
 
-            font-size: medium;
+            font-size: x-large;
             font-weight: bold;
+        }
+
+        @media screen and (max-width: 600px) {
+            .content {
+                font-size: small;
+            }
         }
     </style>
 </head>
 <body>
+
+<video class="video" autoplay muted loop>
+    <source src="{{.URL}}" type="video/mp4">
+</video>
 
 <div class="bg">
     <p class="content">MOOD: {{ StringJoin .Mood " " | ToUpper }}</p>
