@@ -1,0 +1,10 @@
+### GET mood
+GET http://localhost:3080/mood
+
+### PUT mood
+PUT http://localhost:3080/mood/test
+
+### GET index.html
+GET http://localhost:3080/
+
+###

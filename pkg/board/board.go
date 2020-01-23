@@ -13,6 +13,86 @@ import (
 const NoGifFoundURL = "https://media.giphy.com/media/9J7tdYltWyXIY/giphy.mp4"
 const InternalServerErrorURL = "https://media.giphy.com/media/OJBrW6nM5hoNW/giphy.mp4"
 
+var boardHTMLTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Moodboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+
+            overflow: hidden;
+        }
+
+        .video {
+            display: block;
+
+            /* Full height */
+            height: 100vh;
+            width: 100vw;
+
+            /* Center and scale the image nicely */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-color: black;
+        }
+
+        .content {
+            color: lightgray;
+            background-color: black;
+
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            margin-left: 3vw;
+            margin-bottom: 3vh;
+            padding: 10px;
+
+            border: ridge lightgray;
+
+            font-size: x-large;
+            font-weight: bold;
+        }
+
+        @media screen and (max-width: 600px) {
+            .content {
+                font-size: small;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<video class="video" autoplay muted loop>
+    <source src="{{.URL}}" type="video/mp4">
+</video>
+
+<div class="bg">
+    <p class="content">MOOD: {{ StringJoin .Mood " " | ToUpper }}</p>
+</div>
+
+<script type="text/javascript">
+    let initial = null;
+
+    setInterval(async () => {
+        const response = await fetch('//' + location.host + '/mood');
+        const {mood} = await response.json();
+        if (initial != null && JSON.stringify(mood) !== JSON.stringify(initial)) {
+            location.reload();
+        } else {
+            initial = mood;
+        }
+    }, 1000);
+</script>
+
+</body>
+</html>
+`
+
 type Board struct {
 }
 
@@ -32,10 +112,16 @@ var templateFunctions = map[string]interface{}{
 
 var renderTemplate = render.New(render.Options{
 	Funcs: []template.FuncMap{templateFunctions},
+	Asset: func(name string) ([]byte, error) {
+		return []byte(boardHTMLTemplate), nil
+	},
+	AssetNames: func() []string {
+		return []string{"templates/board.tmpl"}
+	},
 }).HTML
 
 func (b *Board) Render(writer io.Writer, mood []string) {
-	renderTemplate(writer, http.StatusOK, "board.html", Gif{URL: b.findGifForMood(mood), Mood: mood})
+	renderTemplate(writer, http.StatusOK, "board", Gif{URL: b.findGifForMood(mood), Mood: mood})
 }
 
 func (b *Board) findGifForMood(mood []string) string {
