@@ -27,6 +27,8 @@ func register(api *Api) http.Handler {
 	router.GET("/", api.handleIndex)
 	router.PUT("/mood/:mood", api.handleMoodUpdate)
 	router.OPTIONS("/mood/:mood", api.handleCorsPreflight)
+	router.GET("/mood/form", api.handleForm)
+	router.POST("/mood/form", api.handleFormUpdate)
 	router.GET("/mood", api.handleMoodGet)
 
 	return router
@@ -38,7 +40,34 @@ func (api *Api) ping(writer http.ResponseWriter, req *http.Request, params httpr
 
 func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	writer.Header().Set("Content-Type", "application/html")
-	api.Board.Render(writer, mood)
+	api.Board.RenderIndex(writer, mood)
+}
+
+func (api *Api) handleForm(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	writer.Header().Set("Content-Type", "application/html")
+	api.Board.RenderForm(writer)
+}
+
+func (api *Api) handleFormUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	api.setCorsHeaders(writer)
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	}
+
+	if req.Form.Get("mood") == "" {
+		http.Error(writer, "no mood provided", http.StatusInternalServerError)
+		return
+	}
+
+	mood = strings.Split(req.Form.Get("mood"), " ")
+	resp, err := json.Marshal(&Response{Mood: mood})
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Write(resp)
 }
 
 func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {

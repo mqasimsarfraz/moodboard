@@ -19,8 +19,6 @@ RUN go build -v -ldflags="-s -w" -o /out/moodboard ./cmd/moodboard
 FROM alpine:3.10
 
 EXPOSE 3080
-
-COPY templates /templates
 COPY --from=go-builder /out/moodboard /
 
 ENTRYPOINT ["/moodboard"]

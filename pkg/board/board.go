@@ -10,9 +10,14 @@ import (
 	"strings"
 )
 
-const NoGifFoundURL = "https://media.giphy.com/media/9J7tdYltWyXIY/giphy.mp4"
-const InternalServerErrorURL = "https://media.giphy.com/media/OJBrW6nM5hoNW/giphy.mp4"
+const (
+	NoGifFoundURL          = "https://media.giphy.com/media/9J7tdYltWyXIY/giphy.mp4"
+	InternalServerErrorURL = "https://media.giphy.com/media/OJBrW6nM5hoNW/giphy.mp4"
+	boardAssetName         = "templates/board.tmpl"
+	formAssetName          = "templates/form.tmpl"
+)
 
+// language=HTML
 var boardHTMLTemplate = `
 <!DOCTYPE html>
 <html>
@@ -93,6 +98,23 @@ var boardHTMLTemplate = `
 </html>
 `
 
+// language=HTML
+var formHTMLTemplate = `
+<!DOCTYPE html> 
+<html> 
+<h3>Mood Form</h3> 
+<body> 
+	<form action="/mood/form" method="post" id="mood"> 
+		<label for="mood">Mood:</label> 
+		<input type="text" name="mood" id="MoodForm"> 
+		<input type="submit" value="Submit"> 
+		<input type="reset" value="Reset"> 
+	</form> 
+</body> 
+</html> 
+
+`
+
 type Board struct {
 }
 
@@ -113,18 +135,25 @@ var templateFunctions = map[string]interface{}{
 var renderTemplate = render.New(render.Options{
 	Funcs: []template.FuncMap{templateFunctions},
 	Asset: func(name string) ([]byte, error) {
+		if name == formAssetName {
+			return []byte(formHTMLTemplate), nil
+		}
 		return []byte(boardHTMLTemplate), nil
 	},
 	AssetNames: func() []string {
-		return []string{"templates/board.tmpl"}
+		return []string{boardAssetName, formAssetName}
 	},
 }).HTML
 
-func (b *Board) Render(writer io.Writer, mood []string) {
+func (b *Board) RenderIndex(writer io.Writer, mood []string) {
 	renderTemplate(writer, http.StatusOK, "board", Gif{URL: b.findGifForMood(mood), Mood: mood})
 }
 
-func (b *Board) findGifForMood(mood []string) string {
+func (b *Board) RenderForm(writer io.Writer) {
+	renderTemplate(writer, http.StatusOK, "form", nil)
+}
+
+func (*Board) findGifForMood(mood []string) string {
 	g := giphy.DefaultClient
 	gif, err := g.Search(mood)
 	if err != nil {
