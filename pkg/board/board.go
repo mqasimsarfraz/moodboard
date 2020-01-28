@@ -102,11 +102,11 @@ var boardHTMLTemplate = `
 var formHTMLTemplate = `
 <!DOCTYPE html> 
 <html> 
-<h3>Mood Form</h3> 
+<h3>What is your mood today?</h3> 
 <body> 
 	<form action="/mood/form" method="post" id="mood"> 
 		<label for="mood">Mood:</label> 
-		<input type="text" name="mood" id="MoodForm"> 
+		<input type="text" name="mood" id="MoodForm" autofocus> 
 		<input type="submit" value="Submit"> 
 		<input type="reset" value="Reset"> 
 	</form> 
