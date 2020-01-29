@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # make sure docker is installed
 which docker > /dev/null 2>&1

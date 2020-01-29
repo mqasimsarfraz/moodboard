@@ -100,7 +100,7 @@ var boardHTMLTemplate = `
 
 // language=HTML
 var formHTMLTemplate = `
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html> 
 <h3>What is your mood today?</h3> 
 <body> 
@@ -110,6 +110,7 @@ var formHTMLTemplate = `
 		<input type="submit" value="Submit"> 
 		<input type="reset" value="Reset"> 
 	</form> 
+	<p class="content">Current Mood: {{ StringJoin . " " | ToUpper }}</p>
 </body> 
 </html> 
 
@@ -149,8 +150,8 @@ func (b *Board) RenderIndex(writer io.Writer, mood []string) {
 	renderTemplate(writer, http.StatusOK, "board", Gif{URL: b.findGifForMood(mood), Mood: mood})
 }
 
-func (b *Board) RenderForm(writer io.Writer) {
-	renderTemplate(writer, http.StatusOK, "form", nil)
+func (b *Board) RenderForm(writer io.Writer, mood []string) {
+	renderTemplate(writer, http.StatusOK, "form", mood)
 }
 
 func (*Board) findGifForMood(mood []string) string {

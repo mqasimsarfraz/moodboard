@@ -45,7 +45,7 @@ func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, param
 
 func (api *Api) handleForm(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	writer.Header().Set("Content-Type", "application/html")
-	api.Board.RenderForm(writer)
+	api.Board.RenderForm(writer, mood)
 }
 
 func (api *Api) handleFormUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
@@ -61,13 +61,9 @@ func (api *Api) handleFormUpdate(writer http.ResponseWriter, req *http.Request, 
 	}
 
 	mood = strings.Split(req.Form.Get("mood"), " ")
-	resp, err := json.Marshal(&Response{Mood: mood})
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-	}
+	writer.Header().Set("Location", "/mood/form")
+	writer.WriteHeader(303)
 
-	writer.Header().Set("Content-Type", "application/json")
-	writer.Write(resp)
 }
 
 func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
