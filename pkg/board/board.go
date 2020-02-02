@@ -8,14 +8,22 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const (
 	NoGifFoundURL          = "https://media.giphy.com/media/9J7tdYltWyXIY/giphy.mp4"
 	InternalServerErrorURL = "https://media.giphy.com/media/OJBrW6nM5hoNW/giphy.mp4"
+	HelloWorldURL          = "https://media.giphy.com/media/PnUatAYWMEMvmiwsyx/giphy.mp4"
 	boardAssetName         = "templates/board.tmpl"
 	formAssetName          = "templates/form.tmpl"
 )
+
+var DefaultGif = &Gif{
+	URL:       HelloWorldURL,
+	Mood:      []string{"Hello", "World"},
+	CreatedAt: time.Now().Unix(),
+}
 
 // language=HTML
 var boardHTMLTemplate = `
@@ -82,14 +90,16 @@ var boardHTMLTemplate = `
 
 <script type="text/javascript">
     let initial = null;
+    let reload = null;
 
     setInterval(async () => {
         const response = await fetch('//' + location.host + '/mood');
-        const {mood} = await response.json();
-        if (initial != null && JSON.stringify(mood) !== JSON.stringify(initial)) {
+        const {mood, timestamp} = await response.json();
+        if (initial != null && (JSON.stringify(mood) !== JSON.stringify(initial) || JSON.stringify(reload) !== JSON.stringify(timestamp))) {
             location.reload();
         } else {
             initial = mood;
+            reload = timestamp;
         }
     }, 1000);
 </script>
@@ -117,15 +127,19 @@ var formHTMLTemplate = `
 `
 
 type Board struct {
+	Gif *Gif
 }
 
 type Gif struct {
-	URL  string
-	Mood []string
+	URL       string
+	Mood      []string
+	CreatedAt int64
 }
 
-func NewBoard() *Board {
-	return &Board{}
+func NewBoard(gif *Gif) *Board {
+	return &Board{
+		Gif: gif,
+	}
 }
 
 var templateFunctions = map[string]interface{}{
@@ -146,15 +160,21 @@ var renderTemplate = render.New(render.Options{
 	},
 }).HTML
 
-func (b *Board) RenderIndex(writer io.Writer, mood []string) {
-	renderTemplate(writer, http.StatusOK, "board", Gif{URL: b.findGifForMood(mood), Mood: mood})
+func (b *Board) RenderIndex(writer io.Writer) {
+	renderTemplate(writer, http.StatusOK, "board", b.Gif)
 }
 
-func (b *Board) RenderForm(writer io.Writer, mood []string) {
-	renderTemplate(writer, http.StatusOK, "form", mood)
+func (b *Board) RenderForm(writer io.Writer) {
+	renderTemplate(writer, http.StatusOK, "form", b.Gif.Mood)
 }
 
-func (*Board) findGifForMood(mood []string) string {
+func (b *Board) UpdateMood(mood []string) {
+	b.Gif.Mood = mood
+	b.Gif.CreatedAt = time.Now().Unix()
+	b.Gif.URL = findGifForMood(mood)
+}
+
+func findGifForMood(mood []string) string {
 	g := giphy.DefaultClient
 	gif, err := g.Search(mood)
 	if err != nil {

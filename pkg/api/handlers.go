@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-var mood = []string{"hello", "world"}
-
 type Api struct {
 	Board *board.Board
 }
@@ -40,12 +38,12 @@ func (api *Api) ping(writer http.ResponseWriter, req *http.Request, params httpr
 
 func (api *Api) handleIndex(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	writer.Header().Set("Content-Type", "application/html")
-	api.Board.RenderIndex(writer, mood)
+	api.Board.RenderIndex(writer)
 }
 
 func (api *Api) handleForm(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	writer.Header().Set("Content-Type", "application/html")
-	api.Board.RenderForm(writer, mood)
+	api.Board.RenderForm(writer)
 }
 
 func (api *Api) handleFormUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
@@ -59,8 +57,7 @@ func (api *Api) handleFormUpdate(writer http.ResponseWriter, req *http.Request, 
 		http.Error(writer, "no mood provided", http.StatusInternalServerError)
 		return
 	}
-
-	mood = strings.Split(req.Form.Get("mood"), " ")
+	api.Board.UpdateMood(strings.Split(req.Form.Get("mood"), " "))
 	writer.Header().Set("Location", "/mood/form")
 	writer.WriteHeader(303)
 
@@ -68,8 +65,9 @@ func (api *Api) handleFormUpdate(writer http.ResponseWriter, req *http.Request, 
 
 func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	api.setCorsHeaders(writer)
-	mood = strings.Split(params.ByName("mood"), " ")
-	resp, err := json.Marshal(&Response{Mood: mood})
+	mood := strings.Split(params.ByName("mood"), " ")
+	api.Board.UpdateMood(mood)
+	resp, err := json.Marshal(&Response{Mood: mood, Timestamp: api.Board.Gif.CreatedAt})
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
@@ -79,7 +77,7 @@ func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, 
 }
 
 func (api *Api) handleMoodGet(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	resp, err := json.Marshal(&Response{Mood: mood})
+	resp, err := json.Marshal(&Response{Mood: api.Board.Gif.Mood, Timestamp: api.Board.Gif.CreatedAt})
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
@@ -98,5 +96,6 @@ func (api *Api) setCorsHeaders(writer http.ResponseWriter) {
 }
 
 type Response struct {
-	Mood []string `json:"mood"`
+	Mood      []string `json:"mood"`
+	Timestamp int64    `json:"timestamp"`
 }

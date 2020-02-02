@@ -4,6 +4,9 @@ GET http://localhost:3080/mood
 ### PUT mood
 PUT http://localhost:3080/mood/test
 
+### PUT mood
+PUT http://localhost:3080/mood/broken
+
 ### GET index.html
 GET http://localhost:3080/
 
