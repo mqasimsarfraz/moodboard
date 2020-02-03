@@ -18,6 +18,6 @@ func main() {
 	}
 
 	// start the server
-	api.Serve(api.NewApi(board.NewBoard(board.DefaultGif)), opts.Address)
+	api.Serve(api.NewApi(board.DefaultBoard), opts.Address)
 
 }

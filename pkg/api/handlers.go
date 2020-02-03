@@ -67,7 +67,7 @@ func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, 
 	api.setCorsHeaders(writer)
 	mood := strings.Split(params.ByName("mood"), " ")
 	api.Board.UpdateMood(mood)
-	resp, err := json.Marshal(&Response{Mood: mood, Timestamp: api.Board.Gif.CreatedAt})
+	resp, err := json.Marshal(&Response{Mood: mood, Timestamp: api.Board.CreatedAt})
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
@@ -77,7 +77,8 @@ func (api *Api) handleMoodUpdate(writer http.ResponseWriter, req *http.Request, 
 }
 
 func (api *Api) handleMoodGet(writer http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	resp, err := json.Marshal(&Response{Mood: api.Board.Gif.Mood, Timestamp: api.Board.Gif.CreatedAt})
+	mood, timestamp := api.Board.GetMoodWithTime()
+	resp, err := json.Marshal(&Response{Mood: mood, Timestamp: timestamp})
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}

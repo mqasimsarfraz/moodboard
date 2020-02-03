@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -19,7 +20,7 @@ const (
 	formAssetName          = "templates/form.tmpl"
 )
 
-var DefaultGif = &Gif{
+var DefaultBoard = &Board{
 	URL:       HelloWorldURL,
 	Mood:      []string{"Hello", "World"},
 	CreatedAt: time.Now().Unix(),
@@ -127,19 +128,10 @@ var formHTMLTemplate = `
 `
 
 type Board struct {
-	Gif *Gif
-}
-
-type Gif struct {
 	URL       string
 	Mood      []string
 	CreatedAt int64
-}
-
-func NewBoard(gif *Gif) *Board {
-	return &Board{
-		Gif: gif,
-	}
+	mutex     sync.Mutex
 }
 
 var templateFunctions = map[string]interface{}{
@@ -161,17 +153,26 @@ var renderTemplate = render.New(render.Options{
 }).HTML
 
 func (b *Board) RenderIndex(writer io.Writer) {
-	renderTemplate(writer, http.StatusOK, "board", b.Gif)
+	renderTemplate(writer, http.StatusOK, "board", b)
 }
 
 func (b *Board) RenderForm(writer io.Writer) {
-	renderTemplate(writer, http.StatusOK, "form", b.Gif.Mood)
+	renderTemplate(writer, http.StatusOK, "form", b.Mood)
 }
 
 func (b *Board) UpdateMood(mood []string) {
-	b.Gif.Mood = mood
-	b.Gif.CreatedAt = time.Now().Unix()
-	b.Gif.URL = findGifForMood(mood)
+	b.mutex.Lock()
+	b.Mood = mood
+	b.CreatedAt = time.Now().Unix()
+	b.URL = findGifForMood(mood)
+	b.mutex.Unlock()
+}
+
+func (b *Board) GetMoodWithTime() (mood []string, timestamp int64) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
+	return b.Mood, b.CreatedAt
 }
 
 func findGifForMood(mood []string) string {
