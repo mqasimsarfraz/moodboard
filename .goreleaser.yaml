@@ -39,3 +39,4 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+      - '^images'
