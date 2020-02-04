@@ -15,7 +15,7 @@ We use it at our workplace and we love it.
 
 ## Installation
 ```
-docker run --rm -d -p 80:3080 --name moodboard smqasims/moodboard:v1.0.2
+docker run --rm -d -p 80:3080 --name moodboard smqasims/moodboard:v1.0.3
 ```
 if you run above on `example.com` then moodboard will be available at http://example.com. 
 
